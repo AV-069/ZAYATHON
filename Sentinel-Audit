@@ -2,82 +2,110 @@ package com.sentinel.audit;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SentinelDashboard extends JFrame {
     private JTextArea logArea;
-    private JButton requestButton;
+    private JButton requestBtn;
+    
+    private int riskScore = 20; 
+    private int secondsActive = 0;
+    private boolean isMonitoring = false;
+    private boolean isSensitiveSession = false;
 
     public SentinelDashboard() {
-        setTitle("Sentinel-Audit | Autonomous AI Guardian");
-        setSize(700, 500);
+        setTitle("Sentinel-Audit | Autonomous Security Proxy");
+        setSize(900, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // The Security Console Log
-        logArea = new JTextArea("--- SENTINEL-AUDIT v3.0: AGENTIC AUDITOR --- \n" +
-                "[SYSTEM] Monitoring Database Boundaries...\n" +
-                "[POLICY] Sensitive Data = INSTANT DENIAL.\n");
+        logArea = new JTextArea("--- SENTINEL-AUDIT v8.0: CONTEXTUAL GATEKEEPER ACTIVE ---\n" +
+                "[SYSTEM] Ready for Interrogation...\n");
         logArea.setEditable(false);
-        logArea.setBackground(Color.BLACK);
-        logArea.setForeground(new Color(0, 255, 100));
+        logArea.setBackground(new Color(10, 15, 20));
+        logArea.setForeground(new Color(0, 255, 180));
         logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         add(new JScrollPane(logArea), BorderLayout.CENTER);
 
-        requestButton = new JButton("Request Database Access");
-        requestButton.setFont(new Font("Arial", Font.BOLD, 14));
-        add(requestButton, BorderLayout.SOUTH);
+        requestBtn = new JButton("Submit Access Request");
+        requestBtn.setFont(new Font("Arial", Font.BOLD, 14));
+        add(requestBtn, BorderLayout.SOUTH);
 
-        requestButton.addActionListener(e -> runAIAssessment());
+        requestBtn.addActionListener(e -> startAIAssessment());
         setVisible(true);
     }
 
-    private void runAIAssessment() {
-        logArea.append("\n[!] ACCESS REQUEST: Verifying Identity & Intent...\n");
+    private void startAIAssessment() {
+        String project = JOptionPane.showInputDialog(this, "Project ID (Assigned: PRJ_AUDIT):");
+        String tables = JOptionPane.showInputDialog(this, "Tables Requested:");
+        String reason = JOptionPane.showInputDialog(this, "Business Justification:");
 
-        // 1. IDENTITY CHECK
-        JPasswordField pf = new JPasswordField();
-        if (JOptionPane.showConfirmDialog(this, pf, "Enter Password:", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION 
-            || !new String(pf.getPassword()).equals("admin123")) {
-            logArea.append("[AUTH_FAILED] Password Mismatch.\n");
-            return;
+        if (project == null || tables == null) return;
+
+        // --- STEP 1: CONTEXT PRE-CHECK (The "Anti-Snoop" Logic) ---
+        if (!project.equalsIgnoreCase("PRJ_AUDIT")) {
+            logArea.append("[DENIED] Project Mismatch: '" + project + "' is not assigned to EMP_001.\n");
+            logArea.append("[RESULT] Request Blocked. Risk Score increased.\n");
+            JOptionPane.showMessageDialog(this, "ACCESS DENIED: Project ID not recognized.", "Security Block", JOptionPane.ERROR_MESSAGE);
+            return; // Exit here so it never reaches the manager
         }
 
-        // 2. THE AI ASSESSMENT (Questions)
-        String project = JOptionPane.showInputDialog(this, "AI ASSESSMENT: Which Project/Meeting is this for?");
-        String tables = JOptionPane.showInputDialog(this, "AI ASSESSMENT: List the tables you need to access:");
-        String reason = JOptionPane.showInputDialog(this, "AI ASSESSMENT: Provide Business Justification:");
-
-        logArea.append("[AI] Analyzing Boundary: Table[" + tables + "] | Context[" + project + "]\n");
-
-        // --- THE AGENTIC VERDICT ---
-        
-        // RULE A: SENSITIVE INFO (Hard Denial)
-        if (tables.toLowerCase().contains("salary") || tables.toLowerCase().contains("payroll") || tables.toLowerCase().contains("finance")) {
-            logArea.append("[DENIED] POLICY VIOLATION: Sensitive data is restricted for this role.\n");
-            logArea.append("[NOTIFY] Manager Alert: Unauthorized Sensitive Data Request logged.\n");
-            JOptionPane.showMessageDialog(this, "ACCESS DENIED: Sensitive information is out of boundary.", "AI Auditor", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        // RULE B: RELIABLE INFO (Context Match)
-        if (project != null && project.equalsIgnoreCase("PROJ_VALS") && 
-           (tables.toLowerCase().contains("attendance") || tables.toLowerCase().contains("student"))) {
-            
-            logArea.append("[SUCCESS] Intent Verified for " + project + ".\n");
-            logArea.append("[NOTIFY] Manager informed: Legitimate access granted to Alice_Dev.\n");
-            
-            requestButton.setEnabled(false);
-            requestButton.setText("ACCESS GRANTED (VIEW-ONLY)");
-            JOptionPane.showMessageDialog(this, "Access Granted. You may now view the requested tables.");
+        // --- STEP 2: SENSITIVITY CHECK ---
+        if (tables.toLowerCase().contains("payroll") || tables.toLowerCase().contains("salary")) {
+            isSensitiveSession = true;
+            logArea.append("[!] SENSITIVE DATA DETECTED: Initiating Approval Chain...\n");
+            triggerEscalation(tables, reason);
         } else {
-            // RULE C: CONTEXT MISMATCH
-            logArea.append("[DENIED] CONTEXT ERROR: Data requested does not match project necessity.\n");
-            logArea.append("[NOTIFY] Manager informed: Access denied due to project/data mismatch.\n");
-            JOptionPane.showMessageDialog(this, "ACCESS DENIED: Request does not align with Project/Meeting necessities.");
+            isSensitiveSession = false;
+            grantAccess("Standard", tables);
         }
     }
 
+    private void triggerEscalation(String tables, String reason) {
+        logArea.append("[STEP 1] Contacting Manager... (Auto-Escalate in 10s)\n");
+        
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                logArea.append("[TIMEOUT] Manager busy. Failover to Team Lead...\n");
+                SwingUtilities.invokeLater(() -> {
+                    int choice = JOptionPane.showConfirmDialog(null, "TEAM LEAD OVERRIDE:\nReason: " + reason, "Escalation", JOptionPane.YES_NO_OPTION);
+                    if (choice == JOptionPane.YES_OPTION) grantAccess("Elevated", tables);
+                });
+            }
+        }, 10000); 
+    }
+
+    private void grantAccess(String level, String tables) {
+        logArea.append("[GRANTED] " + level + " access to " + tables + ".\n");
+        isMonitoring = true; 
+        secondsActive = 0;
+        startSilentMonitoring();
+        JOptionPane.showMessageDialog(this, "Access Granted. Behavior is being analyzed.");
+    }
+
+    private void startSilentMonitoring() {
+        Timer monitor = new Timer();
+        monitor.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!isMonitoring) { monitor.cancel(); return; }
+                secondsActive += 5;
+
+                // Unusual activity detection (No visible timer)
+                if (isSensitiveSession && secondsActive > 15) {
+                    logArea.append("[ALERT] BEHAVIORAL ANOMALY: Excessive Dwell Time detected.\n");
+                    JOptionPane.showMessageDialog(null, "AI ALERT: Suspicious patterns detected. Session flagged.", "SECURITY WARNING", JOptionPane.WARNING_MESSAGE);
+                    isMonitoring = false;
+                    monitor.cancel();
+                }
+            }
+        }, 1000, 2000);
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SentinelDashboard());
+        SwingUtilities.invokeLater(SentinelDashboard::new);
     }
 }
