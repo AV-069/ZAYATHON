@@ -1,0 +1,83 @@
+package com.sentinel.audit;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class SentinelDashboard extends JFrame {
+    private JTextArea logArea;
+    private JButton requestButton;
+
+    public SentinelDashboard() {
+        setTitle("Sentinel-Audit | Autonomous AI Guardian");
+        setSize(700, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // The Security Console Log
+        logArea = new JTextArea("--- SENTINEL-AUDIT v3.0: AGENTIC AUDITOR --- \n" +
+                "[SYSTEM] Monitoring Database Boundaries...\n" +
+                "[POLICY] Sensitive Data = INSTANT DENIAL.\n");
+        logArea.setEditable(false);
+        logArea.setBackground(Color.BLACK);
+        logArea.setForeground(new Color(0, 255, 100));
+        logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        add(new JScrollPane(logArea), BorderLayout.CENTER);
+
+        requestButton = new JButton("Request Database Access");
+        requestButton.setFont(new Font("Arial", Font.BOLD, 14));
+        add(requestButton, BorderLayout.SOUTH);
+
+        requestButton.addActionListener(e -> runAIAssessment());
+        setVisible(true);
+    }
+
+    private void runAIAssessment() {
+        logArea.append("\n[!] ACCESS REQUEST: Verifying Identity & Intent...\n");
+
+        // 1. IDENTITY CHECK
+        JPasswordField pf = new JPasswordField();
+        if (JOptionPane.showConfirmDialog(this, pf, "Enter Password:", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION 
+            || !new String(pf.getPassword()).equals("admin123")) {
+            logArea.append("[AUTH_FAILED] Password Mismatch.\n");
+            return;
+        }
+
+        // 2. THE AI ASSESSMENT (Questions)
+        String project = JOptionPane.showInputDialog(this, "AI ASSESSMENT: Which Project/Meeting is this for?");
+        String tables = JOptionPane.showInputDialog(this, "AI ASSESSMENT: List the tables you need to access:");
+        String reason = JOptionPane.showInputDialog(this, "AI ASSESSMENT: Provide Business Justification:");
+
+        logArea.append("[AI] Analyzing Boundary: Table[" + tables + "] | Context[" + project + "]\n");
+
+        // --- THE AGENTIC VERDICT ---
+        
+        // RULE A: SENSITIVE INFO (Hard Denial)
+        if (tables.toLowerCase().contains("salary") || tables.toLowerCase().contains("payroll") || tables.toLowerCase().contains("finance")) {
+            logArea.append("[DENIED] POLICY VIOLATION: Sensitive data is restricted for this role.\n");
+            logArea.append("[NOTIFY] Manager Alert: Unauthorized Sensitive Data Request logged.\n");
+            JOptionPane.showMessageDialog(this, "ACCESS DENIED: Sensitive information is out of boundary.", "AI Auditor", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // RULE B: RELIABLE INFO (Context Match)
+        if (project != null && project.equalsIgnoreCase("PROJ_VALS") && 
+           (tables.toLowerCase().contains("attendance") || tables.toLowerCase().contains("student"))) {
+            
+            logArea.append("[SUCCESS] Intent Verified for " + project + ".\n");
+            logArea.append("[NOTIFY] Manager informed: Legitimate access granted to Alice_Dev.\n");
+            
+            requestButton.setEnabled(false);
+            requestButton.setText("ACCESS GRANTED (VIEW-ONLY)");
+            JOptionPane.showMessageDialog(this, "Access Granted. You may now view the requested tables.");
+        } else {
+            // RULE C: CONTEXT MISMATCH
+            logArea.append("[DENIED] CONTEXT ERROR: Data requested does not match project necessity.\n");
+            logArea.append("[NOTIFY] Manager informed: Access denied due to project/data mismatch.\n");
+            JOptionPane.showMessageDialog(this, "ACCESS DENIED: Request does not align with Project/Meeting necessities.");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new SentinelDashboard());
+    }
+}
