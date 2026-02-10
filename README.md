@@ -1,0 +1,4 @@
+About Sentinel-Audit
+Sentinel-Audit is an intelligent security "gatekeeper" that protects company databases by watching not just who enters, but what they do once they are inside. Instead of just checking a password, the system asks for a Project ID and a reason for the request, instantly blocking anyone trying to "snoop" into files that don't match their current task.
+
+If an employee needs sensitive info like payroll, the AI handles the approval—if a manager is too busy to respond, the system automatically moves the request to a Team Lead so work doesn't stop. While the employee is looking at the data, the AI silently monitors their behavior, flagging an alert if they stay on a sensitive screen for too long or try to pull too much information at once. By automatically verifying 90% of routine daily tasks, the system saves human auditors hours of work, allowing them to focus only on the high-risk "red flags" caught in real-time.
