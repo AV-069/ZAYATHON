@@ -1,0 +1,22 @@
+CREATE DATABASE sentinel_db;
+USE sentinel_db;
+
+-- User Role and Hierarchy Metadata
+CREATE TABLE employee_registry (
+    emp_id VARCHAR(20) PRIMARY KEY,
+    name VARCHAR(100),
+    role VARCHAR(50), -- e.g., Senior_Analyst
+    clearance_level INT -- 1 to 5
+);
+
+-- Active Project Context (The "Necessity" Map)
+CREATE TABLE project_directory (
+    project_id VARCHAR(20) PRIMARY KEY,
+    assigned_emp VARCHAR(20),
+    project_name VARCHAR(100),
+    authorized_tables TEXT -- Comma separated list of approved tables
+);
+
+-- Professional Demo Data
+INSERT INTO employee_registry VALUES ('EMP_001', 'Anand K.', 'Senior_Analyst', 3);
+INSERT INTO project_directory VALUES ('PRJ_AUDIT', 'EMP_001', 'Q1 Financial Review', 'transaction_logs, client_metadata');
